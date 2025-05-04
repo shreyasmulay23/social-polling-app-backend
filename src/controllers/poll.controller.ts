@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import {
   createPollWithOptions,
+  deletePoll,
   getAllPollsByUserId,
   updatePollWithOptions,
 } from '../services/polls.service'
@@ -54,6 +55,23 @@ export const updatePoll = async (
     )
 
     res.status(200).json({ success: true })
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const deletePollHandler = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { pollId } = req.params
+    const { userId } = req.body
+
+    await deletePoll(pollId, userId)
+
+    return res.status(200).json({ success: true })
   } catch (error) {
     next(error)
   }

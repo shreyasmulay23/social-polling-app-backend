@@ -11,7 +11,7 @@ const supabase = getSupabaseClient()
 export const getAllPollsByUserId = async (userId: string) => {
   if (!supabase)
     throw new ApiError(
-      401,
+      500,
       'Supabase client initialization failed.',
       'SUPABASE_INIT_FAILED'
     )
@@ -28,7 +28,7 @@ export const getAllPollsByUserId = async (userId: string) => {
     )
     .order('created_at', { ascending: false })
 
-  if (error) throw new ApiError(401, 'Failed to fetch polls.', 'FETCH_FAILED')
+  if (error) throw new ApiError(500, 'Failed to fetch polls.', 'FETCH_FAILED')
 
   const polls = pollsRaw.map((poll) => {
     const voteCounts = poll.options.map((opt) => {
@@ -73,7 +73,7 @@ export async function createPollWithOptions(
 ) {
   if (!supabase)
     throw new ApiError(
-      401,
+      500,
       'Supabase client initialization failed.',
       'SUPABASE_INIT_FAILED'
     )
@@ -87,7 +87,7 @@ export async function createPollWithOptions(
 
   if (pollError)
     throw new ApiError(
-      401,
+      500,
       `Poll creation failed: ${pollError.message}`,
       'POLL_CREATE_FAILED'
     )
@@ -108,7 +108,7 @@ export async function createPollWithOptions(
     // Rollback poll if options fail
     await supabase.from('polls').delete().eq('id', poll.id)
     throw new ApiError(
-      401,
+      500,
       `Options creation failed: ${optionsError.message}`,
       'OPTIONS_CREATE_FAILED'
     )
@@ -126,7 +126,7 @@ export const updatePollWithOptions = async (
 ) => {
   if (!supabase)
     throw new ApiError(
-      401,
+      500,
       'Supabase client initialization failed.',
       'SUPABASE_INIT_FAILED'
     )
@@ -135,40 +135,98 @@ export const updatePollWithOptions = async (
   const { error: updatePollError } = await supabase
     .from('polls')
     .update({ question })
-    .eq('id', pollId);
+    .eq('id', pollId)
 
-  if (updatePollError) throw new ApiError(
-    401,
-    `Failed to update poll title: ${updatePollError.message}`,
-    'POLL_TITLE_UPDATE_FAILED'
-  )
+  if (updatePollError)
+    throw new ApiError(
+      500,
+      `Failed to update poll title: ${updatePollError.message}`,
+      'POLL_TITLE_UPDATE_FAILED'
+    )
 
   // 2. Update options
   for (let i = 0; i < originalOptions.length; i++) {
-    const original = originalOptions[i];
-    const updatedText = options[i];
+    const original = originalOptions[i]
+    const updatedText = options[i]
 
     if (original.text !== updatedText) {
       await supabase
         .from('options')
         .update({ text: updatedText })
-        .eq('id', original.id);
+        .eq('id', original.id)
     }
   }
 
   // 3. Remove extra options if no votes
   if (!hasVotes) {
-    const removed = originalOptions.slice(options.length);
+    const removed = originalOptions.slice(options.length)
     for (const ro of removed) {
-      await supabase.from('options').delete().eq('id', ro.id);
+      await supabase.from('options').delete().eq('id', ro.id)
     }
 
     // 4. Add new options
-    const newOptions = options.slice(originalOptions.length).filter((o: string) => o.trim() !== '');
+    const newOptions = options
+      .slice(originalOptions.length)
+      .filter((o: string) => o.trim() !== '')
     if (newOptions.length > 0) {
-      await supabase.from('options').insert(
-        newOptions.map((text: string) => ({ text, poll_id: pollId }))
-      );
+      await supabase
+        .from('options')
+        .insert(newOptions.map((text: string) => ({ text, poll_id: pollId })))
     }
   }
-};
+}
+
+export const deletePoll = async (pollId: string, userId: string) => {
+  if (!supabase)
+    throw new ApiError(
+      500,
+      'Supabase client initialization failed.',
+      'SUPABASE_INIT_FAILED'
+    )
+
+  // 1. Verify poll ownership
+  const { data: poll, error: pollError } = await supabase
+    .from('polls')
+    .select('user_id')
+    .eq('id', pollId)
+    .single()
+
+  if (pollError || !poll) {
+    throw new ApiError(
+      404,
+      `Poll not found with given poll id ${pollId}`,
+      'POLL_NOT_FOUND'
+    )
+  }
+
+  if (poll.user_id !== userId) {
+    throw new ApiError(
+      403,
+      `Forbidden - You can only delete your own polls ${userId}`,
+      'FORBIDDEN'
+    )
+  }
+
+  // 2. Delete associated options
+  const { error: deleteOptionsError } = await supabase
+    .from('options')
+    .delete()
+    .eq('poll_id', pollId)
+
+  if (deleteOptionsError) {
+    throw new ApiError(
+      500,
+      `Failed to delete poll options`,
+      'OPTIONS_DELETE_FAILED'
+    )
+  }
+
+  // 3. Delete the poll itself
+  const { error } = await supabase.from('polls').delete().eq('id', pollId)
+
+  if (error) {
+    throw new ApiError(500, `Failed to delete poll`, 'POLL_DELETE_FAILED')
+  }
+
+  return { success: true }
+}
