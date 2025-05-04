@@ -27,4 +27,8 @@ app.get('/test-cors', (_req, res) => {
   res.json({ message: 'CORS test successful' })
 })
 
+app.get('/health', (_req, res) => {
+  res.status(200).send('OK');
+});
+
 export default app
