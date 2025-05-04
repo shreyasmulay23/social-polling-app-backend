@@ -8,17 +8,11 @@ import { loggerMiddleware } from './middlewares/logger.middleware'
 dotenv.config()
 const app = express()
 
-const isProduction = process.env.NODE_ENV === 'production'
-
-// Configure CORS properly for production
-const corsOptions = {
-  origin: ['*'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}
-
-app.use(isProduction ? cors(corsOptions) : cors())
+app.use(
+  cors({
+    origin: '*'
+  })
+)
 
 app.use(express.json())
 app.use(loggerMiddleware)
