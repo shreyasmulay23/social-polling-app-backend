@@ -116,3 +116,59 @@ export async function createPollWithOptions(
 
   return poll.id
 }
+
+export const updatePollWithOptions = async (
+  pollId: string,
+  question: string,
+  options: string[],
+  originalOptions: { id: number; text: string }[],
+  hasVotes: boolean
+) => {
+  if (!supabase)
+    throw new ApiError(
+      401,
+      'Supabase client initialization failed.',
+      'SUPABASE_INIT_FAILED'
+    )
+
+  // 1. Update poll question
+  const { error: updatePollError } = await supabase
+    .from('polls')
+    .update({ question })
+    .eq('id', pollId);
+
+  if (updatePollError) throw new ApiError(
+    401,
+    `Failed to update poll title: ${updatePollError.message}`,
+    'POLL_TITLE_UPDATE_FAILED'
+  )
+
+  // 2. Update options
+  for (let i = 0; i < originalOptions.length; i++) {
+    const original = originalOptions[i];
+    const updatedText = options[i];
+
+    if (original.text !== updatedText) {
+      await supabase
+        .from('options')
+        .update({ text: updatedText })
+        .eq('id', original.id);
+    }
+  }
+
+  // 3. Remove extra options if no votes
+  if (!hasVotes) {
+    const removed = originalOptions.slice(options.length);
+    for (const ro of removed) {
+      await supabase.from('options').delete().eq('id', ro.id);
+    }
+
+    // 4. Add new options
+    const newOptions = options.slice(originalOptions.length).filter((o: string) => o.trim() !== '');
+    if (newOptions.length > 0) {
+      await supabase.from('options').insert(
+        newOptions.map((text: string) => ({ text, poll_id: pollId }))
+      );
+    }
+  }
+};
