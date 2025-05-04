@@ -4,6 +4,10 @@ import { getSupabaseClient } from '../utils/supabaseClient'
 
 const supabase = getSupabaseClient()
 
+/**
+ * Get all polls by user id
+ * @param userId
+ */
 export const getAllPollsByUserId = async (userId: string) => {
   if (!supabase)
     throw new ApiError(
@@ -54,4 +58,61 @@ export const getAllPollsByUserId = async (userId: string) => {
   })
 
   return polls
+}
+
+/**
+ * Create poll service method
+ * @param userId
+ * @param question
+ * @param options
+ */
+export async function createPollWithOptions(
+  userId: string,
+  question: string,
+  options: string[]
+) {
+  if (!supabase)
+    throw new ApiError(
+      401,
+      'Supabase client initialization failed.',
+      'SUPABASE_INIT_FAILED'
+    )
+
+  // 1. Insert poll
+  const { data: poll, error: pollError } = await supabase
+    .from('polls')
+    .insert({ question, user_id: userId })
+    .select()
+    .single()
+
+  if (pollError)
+    throw new ApiError(
+      401,
+      `Poll creation failed: ${pollError.message}`,
+      'POLL_CREATE_FAILED'
+    )
+
+  // 2. Insert options
+  const optionsData = options
+    .filter((text) => text.trim() !== '')
+    .map((text) => ({
+      text,
+      poll_id: poll.id,
+    }))
+
+  const { error: optionsError } = await supabase
+    .from('options')
+    .insert(optionsData)
+
+  if (optionsError) {
+    // Rollback poll if options fail
+    await supabase.from('polls').delete().eq('id', poll.id)
+    throw new ApiError(
+      401,
+      `Options creation failed: ${optionsError.message}`,
+      'OPTIONS_CREATE_FAILED'
+    )
+  }
+
+  return poll.id
 }

@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
-import { getAllPollsByUserId } from '../services/polls.service'
+import {
+  createPollWithOptions,
+  getAllPollsByUserId,
+} from '../services/polls.service'
 
 export const getPolls = async (
   req: Request,
@@ -17,3 +20,17 @@ export const getPolls = async (
     next(error)
   }
 }
+
+export const createPoll = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { userId, question, options } = req.body;
+    const pollId = await createPollWithOptions(userId, question, options);
+    res.status(201).json({ pollId });
+  } catch (error) {
+    next(error);
+  }
+};
