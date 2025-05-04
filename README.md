@@ -1,10 +1,17 @@
 # 🗳️ Social Polling Backend (Node.js + Supabase)
 
+[![GitHub Repo stars](https://img.shields.io/github/stars/shreyasmulay23/social-polling-app-backend?style=flat-square)](https://github.com/shreyasmulay23/social-polling-app-backend/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/shreyasmulay23/social-polling-app-backend?style=flat-square)](https://github.com/shreyasmulay23/social-polling-app-backend/network)
+[![Top Lang](https://img.shields.io/github/languages/top/shreyasmulay23/social-polling-app-backend?style=flat-square)](https://github.com/shreyasmulay23/social-polling-app-backend)
+[![Last Commit](https://img.shields.io/github/last-commit/shreyasmulay23/social-polling-app-backend?style=flat-square)](https://github.com/shreyasmulay23/social-polling-app-backend/commits/main)
+[![Website Status](https://img.shields.io/website?url=http%3A//social-polling-app-backend.onrender.com)](https://img.shields.io/website?url=http%3A//social-polling-app-backend.onrender.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express.js-Framework-lightgrey.svg)](https://expressjs.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL+Auth-brightgreen.svg)](https://supabase.com/)
+[![TypeScript](https://img.shields.io/badge/Built%20With-TypeScript-blue?logo=typescript&style=flat-square)](https://www.typescriptlang.org/)
 [![Deployed on Render](https://img.shields.io/badge/Deploy-Render-blueviolet)](https://render.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Open in VS Code](https://img.shields.io/badge/Open%20in-VSCode-007ACC?logo=visualstudiocode&style=flat-square)](https://github.com/shreyasmulay23/social-polling-app-backend)
 
 This is the backend API for a social polling application built using **Node.js**, **Express**, **Supabase**, and
 **TypeScript**. It powers functionalities like creating, updating, deleting, and voting on polls, with proper
@@ -136,6 +143,7 @@ npm run dev
 ---
 
 ## 📜 License
+
 MIT License © 2025 Shreyas Mulay
 
 ---
