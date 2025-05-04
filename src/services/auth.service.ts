@@ -1,5 +1,8 @@
-import { supabase } from '../utils/supabaseClient'
 import { ApiError } from '../utils/ApiError'
+
+import { getSupabaseClient } from '../utils/supabaseClient'
+
+const supabase = getSupabaseClient()
 
 export const signup = async (email: string, password: string) => {
 

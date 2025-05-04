@@ -1,18 +1,15 @@
-import express from 'express'
 import dotenv from 'dotenv'
+dotenv.config()
+
+import express from 'express'
 import cors from 'cors'
 import authRoutes from './routes/auth.routes'
 import { errorMiddleware } from './middlewares/error.middleware'
 import { loggerMiddleware } from './middlewares/logger.middleware'
 
-dotenv.config()
 const app = express()
 
-app.use(
-  cors({
-    origin: '*'
-  })
-)
+app.use(cors({ origin: '*' }))
 
 app.use(express.json())
 app.use(loggerMiddleware)
