@@ -1,4 +1,4 @@
-# 🗳️ Social Polling Backend (Node.js + Supabase)
+# 🗳️ Social Polling Backend  (Node.js + Supabase)
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/shreyasmulay23/social-polling-app-backend?style=flat-square)](https://github.com/shreyasmulay23/social-polling-app-backend/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/shreyasmulay23/social-polling-app-backend?style=flat-square)](https://github.com/shreyasmulay23/social-polling-app-backend/network)
